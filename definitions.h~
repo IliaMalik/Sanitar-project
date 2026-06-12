@@ -1,0 +1,11 @@
+
+//NPC and PLAYER and WORLD definitions
+
+typedef unsigned short int unshint;
+
+#define WORKHERE 9999
+
+#define RAWS 30
+#define COLS 60
+
+unshint* signal_intruder(unshint x_cord, unshint y_cord);
