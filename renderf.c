@@ -8,11 +8,18 @@
  */
 #include "definitions.h"
 
-void rerender(unshint screen[RAWS][COLS], unshint* changes){ /*changes is an array looking
+void rerender(unshint screen[RAWS][COLS], ENTITY* changes){ /*changes is an array looking
 							       like [x1,y1,who1,x2,y2,who2..., xn, yn, whon, PLUG]*/
-	int i = 0;
+	int i = 0;                   /* we can choose what kind
+					of action will be in this
+					very moment, so we don't 
+					have to add a position for 
+					this in 'changes'.*/
 	while(changes[i] != PLUG){
-		screen[i][i+1] = 
+		switch(/*type*/)
+
+
+		screen[i][i+1] = WORKHERE;
 		
 		
 		i++;
