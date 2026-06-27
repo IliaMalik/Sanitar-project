@@ -1,21 +1,46 @@
-//This is the file for the realization of functions to render the image
+//This is the file for the realization of functions to render and draw the image
 /* Escape sequencies instruction: 
- *
- *
+ * ■
+ * □
  *
  *
  *
  */
-#include "definitions.h"
+#include <sys/ioctl.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <string.h>
 
-void rerender(unshint screen[RAWS][COLS], ENTITY* changes){ /*changes is an array looking
-							       like [x1,y1,who1,x2,y2,who2..., xn, yn, whon, PLUG]*/
-	int i = 0;                   /* we can choose what kind
-					of action will be in this
-					very moment, so we don't 
-					have to add a position for 
-					this in 'changes'.*/
-	while(changes[i] != PLUG){
+#include "definitions.h"
+#include "terminaldef.h"
+
+
+
+
+static struct winsize windowsize = get_window_size();
+
+static char** screen = malloc();
+
+
+
+void initial_draw(void){
+	
+	draw_ship(windowsize.ws_row /2 , windowsize.ws_col /2);
+	draw_net( windowsize.ws_row /2 , windowsize.ws_col /2);
+	update_score();	
+
+
+
+}
+
+
+
+void rerender(unshint screen[RAWS][COLS], ENTITY* collector){ /*collector is an array looking like
+							      raw of ENTITY's and each entity says what it 
+							      wants to do*/ 
+	int i = 0;                   	
+	while(collector[i] != PLUG){
 		switch(/*type*/)
 
 
@@ -25,16 +50,24 @@ void rerender(unshint screen[RAWS][COLS], ENTITY* changes){ /*changes is an arra
 		i++;
 	}	
 	
-	free(changes);
+	free(collector);
 }
 
 
-void dr_lod(unshint x, unshint y){		
+void draw_ship(unshint mid_x, unshint mid_y){		
 	
 	
 	
 	
 	
+}
+
+void draw_net(unshint ship_center_x, unshint ship_center_y, ){
+
+
+
+
+
 }
 
 
