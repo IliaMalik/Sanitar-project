@@ -28,8 +28,8 @@ static struct winsize windowsize; // gets it's value in function "init_screen()"
 
 static char* screen = NULL;
 // screen array will be set as: | 0 row | 1 row | 2 row | ...
-static unshint rows;
-static unshint cols;
+static unshint row;
+static unshint col;
 
 static short int spiv_x;
 static short int spiv_y;
@@ -142,58 +142,86 @@ void draw_net(unshint formfactor){
 	unshint type_of_net_pivot; // look definitions at the begining  
 	short int extrah; // a vertical part of the net beyond the ship (idk how to explain this)
 	short int extraw;
-
+	
 
 	switch (formfactor){ // 0 is the heighest, 3 is the widest form
 		case (0):
 			height = 18;
-			width  = 12;
-			extrah = (height  - 6)/2;
-			extraw = (width   - 6)/2;
-			if ((spiv_y + extrah  + 5) > row){ // check for upper bound
-				stopper_y = extrah + row - (spiv_y + 5);
-				type_of_net_pivot = LEBO;
-			} else if(spiv_y - extrah < 0){ // check for bottom bound
-				stopper_y = 2 * extrah - spiv_y + 5;
-				type_of_net_pivot = LEUP;
-			} else{
-				stopper_y = height
-			if (spiv_x + extraw + 5 > cols){ // check for the right bound
-				stopper_x = cols - spiv_x;
-			}else if(spiv_x < cols){ // check for the left bound
-				type_of_net_pivot++ // will switch whatever there was to the right side
-			}
-
-
-							
-			
+			width  = 12;			
 			break;
 		case (1):
 			height = 16;
 			width  = 14;
-			extrah = (height  - 6)/2;
-			extraw = (width   - 6)/2;		
+				
 			break;	
 		case (2):
 			height = 14;
 			width  = 16;
-			extrah = (height  - 6)/2;
-			extraw = (width   - 6)/2;
+		
 			break;
 		case (3):
 			height = 12;
 			width  = 18;
-			extrah = (height  - 6)/2;
-			extraw = (width   - 6)/2;
 			break;
-		for(i = 0; i < width; i++){ //horizontal sides
-			screen[netpivot_y * row + i + netpivot_x           ] = ''; // bottom side
-			screen[(netpivot_y - height) * row + i + netpivot_x] = ''; // upper side
-		}
-		for(j = 0; j < height; j++){
-			screen[(netpivot_y - j) * row + netpivot_x         ] = ''; // left side
-			screen[(netpivot_y - j) * row + netpivot_x + width ] = ''; // right side
-		}
+	}
+	
+	
+	extrah = (height  - 6)/2;
+	extraw = (width   - 6)/2;
+	if ((spiv_y + extrah  + 5) > row){ // check for upper bound
+		stopper_y = extrah + 6 + row - (spiv_y + 5);
+		type_of_net_pivot = LEBO;
+	} else if(spiv_y - extrah < 0){ // check for bottom bound
+		stopper_y = 2 * extrah - spiv_y + 5;
+		type_of_net_pivot = LEUP;
+	} else{
+		stopper_y = height;
+		type_of_net_pivot = LEBO;
+	}
+	if (spiv_x + extraw + 5 > col){ // check for the right bound
+		stopper_x = extraw + 6 + col - (spiv_x + 5);
+	}else if(spiv_x < col){ // check for the left bound
+		stopper_x = extraw + spiv_x + 5;
+		type_of_net_pivot++ // will switch whatever there was to the right side
+	}else{
+		stopper_x = width;
+	}
+
+	/*** LEBO pivot ***/
+	for(i = 0; i < stopper_x; i++){ //horizontal sides
+		screen[netpivot_y * row + i + netpivot_x] = ''; // bottom side
+		if (stopper_y == height)
+			screen[(netpivot_y + height) * row + i + netpivot_x] = ''; // upper side
+	}
+	for(j = 0; j < stopper_y; j++){ // vertical sides
+		screen[(netpivot_y - j) * row + netpivot_x] = ''; // left side
+		if (stopper_x == width)
+			screen[(netpivot_y - j) * row + netpivot_x + width] = ''; // right side
+	}
+	/*** RIBO pivot ***/
+	for(i = 0; i < stopper_x; i++){ //horizontal sides
+		screen[netpivot_y * row - i + netpivot_x] = ''; // bottom side
+		if (stopper_y == height)
+			screen[(netpivot_y + height) * row - i + netpivot_x] = ''; // upper side
+	}
+	for(j = 0; j < stopper_y; j++){ // vertical sides
+		if (stopper_x == width)
+			screen[(netpivot_y - j) * row + netpivot_x] = ''; // left side
+		screen[(netpivot_y - j) * row + netpivot_x + width] = ''; // right side
+	}
+	/*** LEUP pivot ***/
+	for(i = 0; i < stopper_x; i++){ //horizontal sides
+		if(stopper_y == height)
+			screen[netpivot_y * row - i + netpivot_x] = ''; // bottom side
+		screen[(netpivot_y + height) * row - i + netpivot_x] = ''; // upper side
+	}
+	for(j = 0; j < stopper_y; j++){ // vertical sides
+		if (stopper_x == width)
+			screen[(netpivot_y - j) * row + netpivot_x] = ''; // left side
+		screen[(netpivot_y - j) * row + netpivot_x + width] = ''; // right side
+	}
+
+
 }
 /*
 void update_score(unshint added_huns, unshint added_tens, unshint added_ones){ 
