@@ -54,21 +54,26 @@ void init_screen(void){
 
 
 
-void upload_to_file_and_print(){
-	int size = (windowsize.ws_row * (windowsize.ws_col + 1) + 8*10 + 50) * sizeof(char);
-							/* 8*10 is for 10 ASCII escape sequences
-							   col + 1 is for \n at the end of a row
-							   +50 is just for dusevny pokoj.*/
-	char *buf = malloc(size);
+void upload_to_file_and_print(unshint score){
+	int size = (row * (col + 1) + 8*10 + 50) * sizeof(char);	/* 8*10 is for 10 ASCII escape sequences
+							   		col + 1 is for \n at the end of a row
+							   		+50 is just for dusevny pokoj.*/
+	char *buf = malloc(size * sizeof(char));
 	FILE* file = fmemopen(buf, size, "w");
-	
+	for (int i = 0; i < row; i++){
+		fwrite(screen + i * col, sizeof(char), col, file);
+		fputc('\n', file);
+		
+	}
+	fprintf(file, "\033[1;1HScore: %d", score);
 
-
+	fclose(file);
+	write(STDOUT_FILENO, buf, strlen(buf));
 	free(buf);
 }
 
 void initial_draw(void){
-	//get_ship_pivot_points()  probably this function should be called in another place
+	//get_ship_pivot_points()  probably this function should be called in gamef.c file
 	init_screen();
 	draw_ship();
 	draw_net();
@@ -79,7 +84,7 @@ void initial_draw(void){
 }
 
 
-
+// Just an artifact for ideas in future
 void rerender(unshint screen[RAWS][COLS], ENTITY* collector){ /*collector is an array looking like
 							      raw of ENTITY's and each entity says what it 
 							      wants to do*/ 
@@ -112,25 +117,35 @@ void draw_ship(void){ // pivot point is the bottom left point of the ship
 */
 
 
-	for(; i < 6; i++){
+	for(; i < SHIPSZ; i++){
 		screen[spiv_x * row - (i*row) + spiv_y    ] = '█'; //left side
 		screen[spiv_x * row + i + spiv_y          ] = '█'; //bottom side
-		screen[spiv_x * row - (i*row) + spiv_y + 6] = '█'; //right side
-		screen[spiv_x * row + i + spiv_y - 6*row  ] = '█'; //upper side	
+		screen[spiv_x * row - (i*row) + spiv_y + SHIPSZ] = '█'; //right side
+		screen[spiv_x * row + i + spiv_y - SHIPSZ*row  ] = '█'; //upper side	
 }
 
-void set_net_pivot(unshint type_of_net_pivot, unshint* netpivot_x, netpivot_y){
+void set_net_pivot(unshint type_of_net_pivot, short int extrah, short int extraw, short int* netpivot_x, short int* netpivot_y){
 	switch (type_of_net_pivot){
 		case LEBO:
-			netpivot
-
-
-
-
+			*netpivot_y = spiv_y - extrah;
+			*netpivot_x = spiv_x - extraw;
+			break;
+		case RIBO:
+			*netpivot_y = spiv_y - extrah;
+			*netpivot_x = spiv_x + SHIPSZ + extraw;
+			break;
+		case LEUP:
+			*netpivot_y = spiv_y + SHIPSZ + extrah;
+			*netpivot_x = spiv_x - extraw;
+			break;
+		case RIUP:
+			*netpivot_y = spiv_y + SHIPSZ + extrah;
+			*netpivot_x = spiv_x + SHIPSZ + extraw;
+			break;
 	}
 }
 
-void draw_net(unshint formfactor){
+void draw_net(short int formfactor){
 	short int netpivot_x;
 	short int netpivot_y;
 	short int height;
@@ -186,42 +201,61 @@ void draw_net(unshint formfactor){
 	}else{
 		stopper_x = width;
 	}
+	
+	set_net_pivot(type_of_net_pivot, extrah, extraw, &netpivot_x, &netpivot_y);
 
-	/*** LEBO pivot ***/
-	for(i = 0; i < stopper_x; i++){ //horizontal sides
-		screen[netpivot_y * row + i + netpivot_x] = ''; // bottom side
-		if (stopper_y == height)
-			screen[(netpivot_y + height) * row + i + netpivot_x] = ''; // upper side
+	/*** LEBO pivot  (1) ***/
+	if (type_of_net_pivot == LEBO){
+		for(i = 0; i < stopper_x; i++){ //horizontal sides
+			screen[netpivot_y * row + i + netpivot_x] = '░'░; // bottom side
+			if (stopper_y == height)
+				screen[(netpivot_y + height) * row + i + netpivot_x] = '░'; // upper side
+		}
+		for(j = 0; j < stopper_y; j++){ // vertical sides
+			screen[(netpivot_y + j) * row + netpivot_x] = '░'; // left side
+			if (stopper_x == width)
+				screen[(netpivot_y + j) * row + netpivot_x + width] = '░'; // right side
+		}
 	}
-	for(j = 0; j < stopper_y; j++){ // vertical sides
-		screen[(netpivot_y - j) * row + netpivot_x] = ''; // left side
-		if (stopper_x == width)
-			screen[(netpivot_y - j) * row + netpivot_x + width] = ''; // right side
+	/*** RIBO pivot (2) ***/
+	if (type_of_net_pivot == RIBO){
+		for(i = 0; i < stopper_x; i++){ //horizontal sides
+			screen[netpivot_y * row - i + netpivot_x] = '░'; // bottom side
+			if (stopper_y == height)
+				screen[(netpivot_y + height) * row - i + netpivot_x] = '░'; // upper side
+		}
+		for(j = 0; j < stopper_y; j++){ // vertical sides
+			if (stopper_x == width)
+				screen[(netpivot_y + j) * row + netpivot_x] = '░'; // left side
+			screen[(netpivot_y + j) * row + netpivot_x + width] = '░'; // right side
+		}
 	}
-	/*** RIBO pivot ***/
-	for(i = 0; i < stopper_x; i++){ //horizontal sides
-		screen[netpivot_y * row - i + netpivot_x] = ''; // bottom side
-		if (stopper_y == height)
-			screen[(netpivot_y + height) * row - i + netpivot_x] = ''; // upper side
+	/*** LEUP pivot (3) ***/
+	if(type_of_net_pivot == LEUP){
+		for(i = 0; i < stopper_x; i++){ //horizontal sides
+			if(stopper_y == height)
+				screen[(netpivot_y - height) * row + i + netpivot_x] = '░'; // bottom side
+			screen[(netpivot_y) * row + i + netpivot_x] = '░'; // upper side
+		}
+		for(j = 0; j < stopper_y; j++){ // vertical sides
+			screen[(netpivot_y - j) * row + netpivot_x] = '░'; // left side
+			if (stopper_x == width)
+				screen[(netpivot_y - j) * row + netpivot_x + width] = '░'; // right side
+		}
 	}
-	for(j = 0; j < stopper_y; j++){ // vertical sides
-		if (stopper_x == width)
-			screen[(netpivot_y - j) * row + netpivot_x] = ''; // left side
-		screen[(netpivot_y - j) * row + netpivot_x + width] = ''; // right side
+	/*** RIUP pivot (4) ***/
+	if(type_of_net_pivot == RIUP){
+		for(i = 0; i < stopper_x; i++){ //horizontal sides
+			if(stopper_y == height)
+				screen[(netpivot_y - height)* row - i + netpivot_x] = '░'; // bottom side
+			screen[netpivot_y * row - i + netpivot_x] = '░'; // upper side
+		}
+		for(j = 0; j < stopper_y; j++){ // vertical sides
+			if (stopper_x == width)
+				screen[(netpivot_y - j) * row + netpivot_x - width] = '░'; // left side
+			screen[(netpivot_y - j) * row + netpivot_x] = '░'; // right side
+		}
 	}
-	/*** LEUP pivot ***/
-	for(i = 0; i < stopper_x; i++){ //horizontal sides
-		if(stopper_y == height)
-			screen[netpivot_y * row - i + netpivot_x] = ''; // bottom side
-		screen[(netpivot_y + height) * row - i + netpivot_x] = ''; // upper side
-	}
-	for(j = 0; j < stopper_y; j++){ // vertical sides
-		if (stopper_x == width)
-			screen[(netpivot_y - j) * row + netpivot_x] = ''; // left side
-		screen[(netpivot_y - j) * row + netpivot_x + width] = ''; // right side
-	}
-
-
 }
 /*
 void update_score(unshint added_huns, unshint added_tens, unshint added_ones){ 
