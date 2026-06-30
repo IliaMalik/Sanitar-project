@@ -1,17 +1,13 @@
 
 //NPC and PLAYER and WORLD definitions
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/ioctl.h>
+
+
 typedef unsigned short int unshint;
 
-#define WORKHERE 666
-
-#define RAWS 30
-#define COLS 60 //Fixed size of a screen. Maybe temporary, maybe not.
-
-#define PLUG 1000 //just a marker for the end of the array for example.
-
-
-#define UP_I 1
 typedef struct{
 	unshint x; 
 	unshint y;
@@ -27,10 +23,35 @@ typedef struct{
  * 7  left for ship
  * 8  right for ship
  * 9  change in form of the net width+
- * 10 change in form of the net height+
- *  
- *  
+ * 10 change in form of the net height+  
 */
 
 
-unshint* signal_intruder(unshint x_cord, unshint y_cord);
+
+
+#define WORKHERE 666
+
+#define RAWS 30
+#define COLS 60 //Fixed size of a screen. Maybe temporary, maybe not.
+
+#define PLUG 1000 //just a marker for the end of the array for example.
+
+#define SHIPSZ 6         /* All sizes here are wrote as length of the one side of the object*/
+#define NETMAX 18
+#define NETMIN 12
+#define NETAREA 216
+
+
+// This is the part of game world beyond the screen
+#define EXTRAPOL (NETMAX - SHIPSZ)/2 
+
+
+
+
+
+
+
+
+
+
+

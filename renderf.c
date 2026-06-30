@@ -15,6 +15,7 @@
 
 #include "definitions.h"
 #include "terminaldef.h"
+#include "render.h"
 
 /*------------Definitions----------*/
 
@@ -39,7 +40,7 @@ static short int spiv_y;
 /*----------Functions--------------*/
 
 
-void get_ship_pivot_points(unshint piv_x, piv_y){
+void get_ship_pivot_points(short int piv_x, short int piv_y){
 	spiv_x = piv_x;
 	spiv_y = piv_y;
 }
@@ -49,12 +50,11 @@ void init_screen(void){
 	screen = malloc(windowsize.ws_row * windowsize.ws_col * sizeof(char));
 	row = windowsize.ws_row;//Just a rename for readability
 	col = windowsize.ws_col;//Just a rename for readability
-
 }
 
 
 
-void upload_to_file_and_print(unshint score){
+void upload_to_file_and_plot(unshint score){
 	int size = (row * (col + 1) + 8*10 + 50) * sizeof(char);	/* 8*10 is for 10 ASCII escape sequences
 							   		col + 1 is for \n at the end of a row
 							   		+50 is just for dusevny pokoj.*/
@@ -78,9 +78,7 @@ void initial_draw(void){
 	draw_ship();
 	draw_net();
 	//update_score(0,0,0);	
-	
-
-
+	upload_to_file_and_plot(score);
 }
 
 
@@ -257,20 +255,4 @@ void draw_net(short int formfactor){
 		}
 	}
 }
-/*
-void update_score(unshint added_huns, unshint added_tens, unshint added_ones){ 
-	
-	screen[0] = 's';		// probably this function won't be in the final version because
-	screen[1] = 'c';		// it is easier to write number directly into the "file"
-	screen[2] = 'o';
-	screen[3] = 'r';
-	screen[4] = 'e';
-	screen[5] = ' ';
-	if(added_huns <= (int)('9' - screen[6]))
-		screen[6] += added_huns;
-	screen[7] = ' ';
-	screen[8] = ' ';
-
-}
-*/
 

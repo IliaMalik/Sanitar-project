@@ -1,29 +1,38 @@
 //NPC and PLAYER and WORLD realizations of functions
-#include <stdlib.h>
+
 #include "definitions.h"
+#include "renderdef.h"
+#include "terminaldef.h"
+
+/*------------Living things--------*/
+
+static unshint score = 0;
+static unshint formfactor = 0;
+static ENTITY* intruders = NULL;
+
+/*------------Functions------------*/
+
+void init_intruders_array(void){ // +- half of game world can be filled by intruders
+	intruders = malloc((get_window_size().ws_row + 2*EXTRAPOL) * (get_window_size().ws_col + 2*EXTRAPOL) * sizeof(ENTITY));
+}
 
 
 
-unshint* signal_intruder(unshint x_cord, unshint y_cord){
-	unshint* x_y_direction = malloc(3*sizeof(unshint));
-	x_y_direction[0] = x_cord;
-	x_y_direction[1] = y_cord;
-	x_y_direction[2] = WORKHERE;//there should be random value in range [0,4]
-		
+
+
+
+
+void Tick(){
+
 	
-	return x_y_direction;
+
+
+	get_ship_pivot_points( ---, ---);
+	init screen();
+	draw_ship();
+	draw_net(formfactor);
+	upload_to_file_and_plot(score);
 }
-
-unshint* signal_ship(unshint x_cord, unshint y_cord, char button_pressed){
-	unshint* x_y_type_of_movement = malloc(3*sizeof(unshint));
-	unshint* x_y_type_of_movement[0] = x_cord;
-	unshint* x_y_type_of_movement[1] = y_cord;
-	unshint* x_y_type_of_movement[2] = (unshint) button_pressed;
-
-	return x_y_type_of_movement;
-}
-
-
 
 
 
